@@ -1,12 +1,18 @@
-name: ci
+name: notificatoin
 on: push
 jobs:
   node-docker:
     runs-on: ubuntu-latest
-    container: #起動するコンテナイメージを指定
-      image: node:latest #指定のdockerイメージを使用
-    steps: #dockerコンテナ内でステップを実行
+    container:
+      image: node:22.3.0
+    steps:
       - name: Log node version
         run: |
-          node -v #nodeバージョンの確認
-          cat /etc/os-release #Linuxバージョンの確認
+          apt-get -qq update && apt-get -qq -y install curl
+          'curl -X POST --data-urlencode
+          "payload={\"channel\": \"#git-notification\",
+          \"username\": \"From GithubGHA\",
+          \"text\": \"
+          これはGithubからだよ!
+          \",
+          \"icon_emoji\": \":ghost:\"}" https://hooks.slack.com/services/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'
