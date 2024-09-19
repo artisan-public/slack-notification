@@ -1,18 +1,37 @@
-name: notificatoin
-on: push
+name: Slack Notification
+
+on: [push]
+
+env:
+  SLACK_USERNAME: DeployBot
+  SLACK_ICON: https://github.githubassets.com/images/modules/logos_page/GitHub-Mark.png
+  SLACK_WEBHOOK: ${{ secrets.SLACK_WEBHOOK_URL }}
+
 jobs:
-  node-docker:
+  slackNotification:
+    name: Slack-Notification
     runs-on: ubuntu-latest
-    container:
-      image: node:22.3.0
+
     steps:
-      - name: Log node version
-        run: |
-          apt-get -qq update && apt-get -qq -y install curl
-          'curl -X POST --data-urlencode
-          "payload={\"channel\": \"#git-notification\",
-          \"username\": \"From GithubGHA\",
-          \"text\": \"
-          これはGithubからだよ!
-          \",
-          \"icon_emoji\": \":ghost:\"}" https://hooks.slack.com/services/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'
+    #-- Gitリポジトリの内容を取得 --#
+    - name: Checkout
+      uses: actions/checkout@v3
+
+    #-- Slack通知 --#
+    # 成功
+    - name: Slack Notification on Success
+      uses: rtCamp/action-slack-notify@v2
+      if: ${{ success() }}
+      env:
+        SLACK_TITLE: Deploy / Success
+        SLACK_COLOR: good
+        SLACK_MESSAGE: デプロイ完了しました🚀
+
+    # 失敗
+    - name: Slack Notification on Failure
+      uses: rtCamp/action-slack-notify@v2
+      if: ${{ failure() }}
+      env:
+        SLACK_TITLE: Deploy / Failure
+        SLACK_COLOR: danger
+        SLACK_MESSAGE: デプロイ失敗しました😢
